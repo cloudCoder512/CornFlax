@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Premium course payment page with smooth 3D animated background. Secure UPI / QR section, automatic fee display, responsive and accessible." />
+  <title>Pay for Course — AppVyntra</title>
+
+  <!-- Three.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
+
+  <style>
+    :root{
+      --bg:#080810;
+      --card:#0f1220cc;
+      --glass: rgba(255,255,255,0.03);
+      --accent:#6ef0ff;
+      --accent-2:#9b7cff;
+      --muted:#9aa3b2;
+      --glass-border: rgba(255,255,255,0.06);
+      --radius:16px;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{height:100%;margin:0;background:var(--bg);color:#eaf3ff;}
+    /* full-screen canvas bg */
+    #bg-canvas{position:fixed;inset:0;z-index:0;display:block;}
+
+    /* Page layout */
+    .wrap{
+      position:relative;
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:48px 24px;
+      z-index:1;
+    }
+
+    .card {
+      width:100%;
+      max-width:1100px;
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:28px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      border-radius:var(--radius);
+      box-shadow: 0 10px 40px rgba(3,6,20,0.7), inset 0 1px 0 rgba(255,255,255,0.02);
+      backdrop-filter: blur(8px) saturate(120%);
+      border: 1px solid var(--glass-border);
+      padding:28px;
+      box-sizing:border-box;
+      overflow:hidden;
+    }
+
+    /* left: form + details */
+    .left {
+      padding:20px;
+      display:flex;
+      flex-direction:column;
+      gap:16px;
+      min-width:0;
+    }
+
+    header.brand {
+      display:flex;
+      align-items:center;
+      gap:12px;
+    }
+    .logo {
+      width:56px;height:56px;border-radius:12px;
+      background: linear-gradient(135deg,var(--accent),var(--accent-2));
+      display:flex;align-items:center;justify-content:center;
+      box-shadow: 0 6px 18px rgba(90,180,255,0.08);
+      font-weight:700;color:#021020;font-size:18px;
+    }
+    h1{margin:0;font-size:20px;letter-spacing: -0.2px;}
+    p.lead{margin:0;color:var(--muted);font-size:13px;}
+
+    form.pay-form{
+      margin-top:4px;
+      display:grid;
+      gap:12px;
+      grid-template-columns:1fr 1fr;
+    }
+    /* full width items */
+    .pay-form .full { grid-column:1/-1; }
+
+    label {
+      font-size:12px;color:var(--muted);
+      display:block;margin-bottom:6px;
+    }
+    input[type="text"], input[type="email"], select {
+      width:100%;
+      padding:12px 14px;
+      border-radius:10px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));
+      border:1px solid rgba(255,255,255,0.03);
+      color: #eaf3ff;
+      outline:none;
+      transition: box-shadow .18s, transform .12s;
+      font-size:14px;
+    }
+    input[readonly] { opacity:0.95; filter:grayscale(.02); }
+
+    input:focus, select:focus{
+      box-shadow: 0 6px 28px rgba(110,240,255,0.06);
+      transform: translateY(-2px);
+      border-color: rgba(110,240,255,0.25);
+    }
+
+    /* payment button */
+    .pay-btn {
+      --g1: rgba(110,240,255,0.12);
+      --g2: rgba(155,124,255,0.12);
+      display:inline-flex;align-items:center;justify-content:center;
+      gap:10px;padding:14px 18px;border-radius:12px;
+      border: none;cursor:pointer;font-weight:600;font-size:15px;
+      background: linear-gradient(135deg,var(--g1),var(--g2));
+      color:#e9fbff;
+      box-shadow: 0 6px 28px rgba(110,240,255,0.06), 0 0 14px rgba(155,124,255,0.06);
+      transition: transform .15s, box-shadow .15s;
+      position:relative;
+      overflow:visible;
+    }
+    .pay-btn:hover{
+      transform: translateY(-4px);
+      box-shadow: 0 18px 50px rgba(110,240,255,0.08);
+    }
+    /* glowing outline */
+    .pay-btn::after{
+      content:"";
+      position:absolute;inset:-2px;border-radius:14px;
+      background: linear-gradient(90deg, rgba(110,240,255,0.08), rgba(155,124,255,0.08));
+      filter: blur(8px);
+      opacity:0;transition:opacity .18s;
+    }
+    .pay-btn:hover::after{opacity:1;}
+
+    /* small glowing pulse */
+    .pay-btn .glow {
+      width:10px;height:10px;border-radius:50%;
+      box-shadow: 0 0 12px rgba(110,240,255,0.8);
+      transform: translateY(-1px);
+    }
+
+    /* right column: qr and summary */
+    .right {
+      padding:18px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
+      border-radius:12px;
+      display:flex;flex-direction:column;gap:14px;
+      align-items:center;justify-content:center;
+    }
+
+    .qr-wrap {
+      width:100%;
+      display:flex;gap:12px;align-items:center;
+      justify-content:center;flex-direction:column;
+    }
+    .qr {
+      width:220px;height:220px;border-radius:12px;
+      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+      display:flex;align-items:center;justify-content:center;
+      border:1px solid rgba(255,255,255,0.03);
+      padding:18px;
+      box-sizing:border-box;
+    }
+    .qr img{max-width:100%;height:auto;border-radius:8px;display:block;}
+
+    .small-note{font-size:13px;color:var(--muted);text-align:center;padding:0 8px;}
+
+    /* course fee badge */
+    .badge {
+      display:inline-block;padding:6px 10px;border-radius:999px;font-weight:600;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+      color:#021020;font-size:13px; box-shadow: 0 8px 28px rgba(90,180,255,0.06);
+    }
+
+    /* subtle divider */
+    hr.sep{border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.02),transparent);margin:8px 0 12px;}
+
+    /* responsive */
+    @media (max-width:980px){
+      .card{grid-template-columns: 1fr;max-width:860px;padding:20px;}
+      .right{order:2;}
+      .left{order:1;}
+      .qr{width:200px;height:200px;}
+      .pay-form{grid-template-columns:1fr;}
+    }
+    @media (max-width:520px){
+      .wrap{padding:28px 16px;}
+      .card{padding:16px;gap:14px;border-radius:12px;}
+      .logo{width:48px;height:48px;}
+      .qr{width:160px;height:160px;}
+      .pay-btn{width:100%;}
+      .pay-form{gap:10px;}
+    }
+
+    /* small helper */
+    .muted{color:var(--muted);font-size:13px;}
+    .success-toast{
+      position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:linear-gradient(90deg, rgba(50,220,180,0.12), rgba(110,240,255,0.06));
+      color:#eafaf8;padding:12px 18px;border-radius:12px;border:1px solid rgba(255,255,255,0.04);box-shadow:0 10px 30px rgba(0,0,0,0.6);
+      display:flex;gap:10px;align-items:center;font-weight:600;
+    }
+  </style>
+</head>
+<body>
+  <!-- THREE.js canvas -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <main class="wrap" role="main">
+    <section class="card" aria-labelledby="pay-title">
+      <div class="left">
+        <div class="brand" aria-hidden="false">
+          <img src="logo.svg">
+            <div>
+            <h1 id="pay-title">AppVyntra — Secure Payment</h1>
+            <p class="lead">Complete your enrolment — secure UPI / QR payment available. Fees update automatically per course.</p>
+          </div>
+        </div>
+
+        <hr class="sep" />
+
+        <form id="paymentForm" class="pay-form" autocomplete="on" novalidate>
+          <div class="full">
+            <label for="fullname">Full name</label>
+            <input id="fullname" name="fullname" type="text" placeholder="Your full name" required aria-required="true" />
+          </div>
+
+          <div class="">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" required aria-required="true" />
+          </div>
+
+          <div class="">
+            <label for="course">Course selection</label>
+            <select id="course" name="course" required aria-required="true">
+              <option value="" disabled selected>Choose Option</Option>...</option>
+              <option value="web" data-fee="4999">Web Development — ₹4,999</option>
+              <option value="cpp" data-fee="3999">C/C++ Programming — ₹3,999</option>
+              <option value="python" data-fee="4999">Python & ML — ₹4,999</option>
+              <option value="iot" data-fee="5999">IoT & Embedded — ₹5,999</option>
+              <option value="fullstack" data-fee="8999">Full Stack Bootcamp — ₹8,999</option>
+            </select>
+          </div>
+
+          <div class="">
+            <label for="fee">Fee (INR)</label>
+            <input id="fee" name="fee" type="text" value="—" readonly aria-readonly="true" />
+          </div>
+
+          <div class="full" style="display:flex;gap:12px;align-items:center;justify-content:flex-start;margin-top:6px;">
+            <button id="payBtn" type="submit" class="pay-btn" aria-label="Proceed to payment">
+              <span class="glow" aria-hidden="true"></span>
+              Pay Now
+            </button>
+            <div class="muted" style="font-size:13px;">
+              or scan the QR on the right <br/><span class="badge" id="badgeFee">—</span>
+            </div>
+          </div>
+        </form>
+
+        <p class="small-note muted full" style="margin-top:6px;">We don’t store sensitive bank data. After clicking <strong>Pay Now</strong>, you will be prompted with payment instructions.</p>
+      </div>
+
+      <aside class="right" aria-label="QR payment and summary">
+        <div style="text-align:center;">
+          <strong style="font-size:15px">Scan to Pay (UPI / Wallet)</strong>
+          <p class="muted" style="margin:6px 0 10px;font-size:13px">Open your UPI app and scan the QR or click Pay Now.</p>
+        </div>
+
+        <div class="qr-wrap">
+          <div class="qr" role="img" aria-label="QR code for payment">
+            <!-- SVG placeholder QR (replace src with your QR PNG/SVG) -->
+            <img src="QR-Code.jpg" src="data:image/svg+xml;utf8,
+              <svg xmlns='http://www.w3.org/2000/svg' width='320' height='320' viewBox='0 0 320 320'>
+                <rect width='320' height='320' fill='%230b0c11'/>
+                <g fill='%23e8fbff'>
+                  <rect x='20' y='20' width='80' height='80'/>
+                  <rect x='40' y='40' width='40' height='40' fill='%230b0c11'/>
+                  <rect x='220' y='20' width='80' height='80'/>
+                  <rect x='240' y='40' width='40' height='40' fill='%230b0c11'/>
+                  <rect x='20' y='220' width='80' height='80'/>
+                  <rect x='40' y='240' width='40' height='40' fill='%230b0c11'/>
+                  <!-- random pattern to simulate QR -->
+                  <rect x='120' y='80' width='16' height='16'/>
+                  <rect x='144' y='80' width='8' height='8'/>
+                  <rect x='160' y='96' width='8' height='8'/>
+                  <rect x='200' y='140' width='8' height='8'/>
+                  <rect x='84' y='160' width='10' height='10'/>
+                  <rect x='260' y='180' width='8' height='8'/>
+                  <rect x='120' y='200' width='24' height='24'/>
+                  <rect x='160' y='240' width='12' height='12'/>
+                </g>
+              </svg>" alt="QR placeholder" />
+          </div>
+
+          <div style="text-align:center;">
+            <div class="muted" style="margin-bottom:6px;">Merchant: AppVyntra</div>
+            <div class="muted">UPI ID: 6306154686@finobank</div>
+          </div>
+        </div>
+
+        <hr class="sep" />
+
+        <div style="width:100%;display:flex;flex-direction:column;gap:8px;align-items:flex-start;">
+          <div style="display:flex;justify-content:space-between;width:100%;">
+            <div class="muted">Selected course</div><div id="summaryCourse" style="font-weight:700">—</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;width:100%;">
+            <div class="muted">Amount</div><div id="summaryFee" style="font-weight:700">—</div>
+          </div>
+        </div>
+
+      </aside>
+    </section>
+  </main>
+
+  <!-- success toast placeholder -->
+  <div id="toast" class="success-toast" style="display:none;">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 6L9 17l-5-5" stroke="#eafffb" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span id="toastText">Payment initiated — check your UPI app.</span>
+  </div>
+
+  <script>
+  (function(){
+    /* ========= Course fee logic ========== */
+    const course = document.getElementById('course');
+    const fee = document.getElementById('fee');
+    const badge = document.getElementById('badgeFee');
+    const summaryCourse = document.getElementById('summaryCourse');
+    const summaryFee = document.getElementById('summaryFee');
+
+    function updateFeeFromSelect(){
+      const opt = course.options[course.selectedIndex];
+      if(!opt || !opt.dataset) {
+        fee.value = '—';
+        badge.textContent = '—';
+        summaryCourse.textContent = '—';
+        summaryFee.textContent = '—';
+        return;
+      }
+      const f = opt.dataset.fee || '';
+      const courseText = opt.textContent || '';
+      fee.value = f ? `₹${Number(f).toLocaleString('en-IN')}` : '—';
+      badge.textContent = f ? `₹${Number(f).toLocaleString('en-IN')}` : '—';
+      summaryCourse.textContent = courseText;
+      summaryFee.textContent = f ? `₹${Number(f).toLocaleString('en-IN')}` : '—';
+    }
+
+    course.addEventListener('change', updateFeeFromSelect);
+    // initial
+    updateFeeFromSelect();
+
+    /* ========= Basic form handling (demo) ========== */
+    const form = document.getElementById('paymentForm');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toastText');
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      // Simple validation (we rely on browser validation too)
+      if(!form.reportValidity()) return;
+      const selected = course.options[course.selectedIndex];
+      if(!selected || !selected.dataset.fee){
+        alert('Please choose a course to proceed.');
+        return;
+      }
+
+      // simulate "initiate payment" flow (replace with real payment integration)
+      toastText.textContent = `Payment initiated for ${selected.textContent} — check your UPI app/QR.`;
+      toast.style.display = 'flex';
+      setTimeout(()=> toast.style.display = 'none', 4000);
+    });
+
+    /* ========= THREE.js animated background (performance tuned) ========== */
+    const canvas = document.getElementById('bg-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5)); // clamp DPR for mid-range devices
+    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    const scene = new THREE.Scene();
+
+    // camera
+    const camera = new THREE.PerspectiveCamera(50, window.innerWidth/window.innerHeight, 0.1, 1000);
+    camera.position.z = 60;
+
+    // ambient light
+    scene.add(new THREE.AmbientLight(0xffffff, 0.2));
+
+    // rotating group
+    const group = new THREE.Group();
+    scene.add(group);
+
+    // central torus (neon wireframe)
+    const torusGeo = new THREE.TorusGeometry(18, 0.8, 64, 200);
+    const torusMat = new THREE.MeshBasicMaterial({ color: 0xa6f7ff, wireframe: true, opacity: 0.18, transparent: true });
+    const torus = new THREE.Mesh(torusGeo, torusMat);
+    group.add(torus);
+
+    // particle field
+    function createParticles(count){
+      const geometry = new THREE.BufferGeometry();
+      const positions = new Float32Array(count * 3);
+      const sizes = new Float32Array(count);
+
+      for(let i=0;i<count;i++){
+        const r = 40 + Math.random() * 120;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = (Math.random() - 0.5) * Math.PI;
+        positions[i*3] = Math.cos(theta) * Math.cos(phi) * r;
+        positions[i*3+1] = Math.sin(phi) * r * 0.6;
+        positions[i*3+2] = Math.sin(theta) * Math.cos(phi) * r;
+        sizes[i] = (Math.random() * 1.5) + 0.25;
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const material = new THREE.PointsMaterial({
+        color: 0x99f7ff,
+        size: 0.9,
+        transparent: true,
+        opacity: 0.85,
+        depthWrite: false
+      });
+
+      const pts = new THREE.Points(geometry, material);
+      return pts;
+    }
+
+    // reduce particles on small screens
+    const particleCount = (window.innerWidth < 600) ? 800 : (window.innerWidth < 1200 ? 1600 : 2600);
+    const particles = createParticles(particleCount);
+    scene.add(particles);
+
+    // subtle color shift
+    let hueShift = 0;
+
+    // animation loop
+    let lastTime = performance.now();
+    function animate(now){
+      const dt = (now - lastTime) * 0.001;
+      lastTime = now;
+
+      // slow rotation for group and torus
+      group.rotation.y += 0.06 * dt;
+      group.rotation.x = Math.sin(now * 0.0005) * 0.08;
+
+      torus.rotation.x += 0.02 * dt;
+      torus.rotation.z += 0.015 * dt;
+
+      // particles orbiting effect
+      particles.rotation.y += 0.02 * dt;
+      particles.rotation.x += 0.005 * dt;
+
+      // color drifting
+      hueShift += 0.02 * dt;
+      const h = (180 + Math.sin(hueShift) * 60) / 360; // hue around cyan-magenta
+      // set material color using HSL to RGB conversion (cheap)
+      const r = 0.5 + Math.sin(hueShift * 0.7) * 0.3;
+      const g = 0.9;
+      const b = 0.95;
+      particles.material.color.setRGB(Math.min(1,r), Math.min(1,g), Math.min(1,b));
+
+      renderer.render(scene, camera);
+      // throttle via rAF
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+
+    // handle resize
+    window.addEventListener('resize', () => {
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+    }, { passive: true });
+
+    // pause animation when tab hidden to save battery
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) renderer.setAnimationLoop(null);
+      else requestAnimationFrame(animate);
+    });
+
+    /* Accessibility helpers: allow keyboard focus styles and pressing Enter on pay button */
+    // (HTML already supports keyboard activation)
+
+    // End IIFE
+  })();
+/* ========= EmailJS Integration ========= */
+// include EmailJS SDK (in <head> or before </body>)
+const emailjsScript = document.createElement("script");
+emailjsScript.src = "https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js";
+document.head.appendChild(emailjsScript);
+
+emailjsScript.onload = () => {
+  emailjs.init("YOUR_PUBLIC_KEY"); // EmailJS से पब्लिक की डालना
+};
+
+/* ========= UPI QR & Payment Flow ========= */
+function generateUPILink(amount){
+  return `upi://pay?pa=6306154686@finobank&pn=AppVyntra&am=${amount}&cu=INR`;
+}
+
+function updateQR(amount){
+  const qrDiv = document.querySelector(".qr img");
+  const upiLink = generateUPILink(amount);
+  // Google chart QR API use करके डायनामिक QR बनाएं
+  qrDiv.src = `https://chart.googleapis.com/chart?cht=qr&chs=250x250&chl=${encodeURIComponent(upiLink)}`;
+}
+
+/* ========= Modified Form Handling ========= */
+form.addEventListener('submit', function(e){
+  e.preventDefault();
+  if(!form.reportValidity()) return;
+  const selected = course.options[course.selectedIndex];
+  if(!selected || !selected.dataset.fee){
+    alert('Please choose a course to proceed.');
+    return;
+  }
+
+  const feeValue = selected.dataset.fee;
+  const userEmail = document.getElementById("email").value;
+  const userName = document.getElementById("fullname").value;
+
+  // 1. Generate UPI QR
+  updateQR(feeValue);
+
+  // 2. Show toast
+  toastText.textContent = `Payment initiated for ${selected.textContent}. Scan QR to pay ₹${feeValue}.`;
+  toast.style.display = 'flex';
+  setTimeout(()=> toast.style.display = 'none', 4000);
+
+  // 3. Send email via EmailJS
+  emailjs.send("service_tahl8s9", "template_xxxxxx", {
+      to_email: userEmail,
+      to_name: userName,
+      course: selected.textContent,
+      amount: feeValue
+  }).then(() => {
+      console.log("Email sent ✅");
+  }).catch(err => console.error(err));
+});
+
+  </script>
+</body>
+
+</html>

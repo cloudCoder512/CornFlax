@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Auth • Secure (HTML/CSS/JS)</title>
+  <meta name="description" content="Login / Sign Up / Forgot — HTML, CSS, JS + Three.js background" />
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root{
+  --bg: #071022;
+  --card: rgba(255,255,255,0.06);
+  --glass-border: rgba(255,255,255,0.06);
+  --accent: #0ea5e9;
+  --muted: rgba(255,255,255,0.75);
+  --error: #fb7185;
+}
+
+/* Auto dark/light via prefers-color-scheme */
+@media (prefers-color-scheme: light){
+  :root{ --bg: #f7fbff; --card: rgba(255,255,255,0.7); --muted: #0f172a; --glass-border: rgba(0,0,0,0.06) }
+  body { color: #0f172a; }
+}
+
+*{ box-sizing: border-box; font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, Arial; }
+html,body{ height:100%; margin:0; background:var(--bg); -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+#bgCanvas{ position:fixed; inset:0; width:100%; height:100%; z-index:-1; display:block; }
+
+/* Layout */
+.wrap{ min-height:100dvh; display:flex; align-items:center; justify-content:center; padding:28px; }
+.card{ width:min(680px, 96%); border-radius:20px; padding:20px; background:var(--card); border:1px solid var(--glass-border); box-shadow:0 12px 40px rgba(2,6,23,0.6); backdrop-filter: blur(10px) saturate(120%); transition:transform .28s ease, box-shadow .28s ease; }
+.card:focus-within{ transform:translateY(-4px); box-shadow:0 20px 60px rgba(2,6,23,0.7); }
+
+/* Brand */
+.brand{ display:flex; gap:12px; align-items:center; margin-bottom:10px; }
+.logo{ width:44px; height:44px; border-radius:10px; }
+
+/* Headings */
+h1{ margin:0; font-size:1.15rem; }
+.muted{ color:var(--muted); opacity:.9; font-size:.92rem; margin:0; }
+
+/* Tabs */
+.tabs{ display:inline-flex; gap:6px; background:transparent; padding:6px; margin:12px 0 8px; }
+.tab{ padding:8px 14px; border-radius:999px; background:transparent; border:none; color:var(--muted); cursor:pointer; font-weight:600; transition:all .18s ease; outline:none; }
+.tab.active{ background:linear-gradient(90deg,var(--accent),#60a5fa); color:white; box-shadow: 0 6px 20px rgba(14,165,233,0.14); }
+.tab:focus-visible{ box-shadow:0 0 0 4px rgba(14,165,233,0.12); }
+
+/* Panels */
+.panels{ margin-top:6px; }
+.panel{ display:none; opacity:0; transform:translateY(8px); transition: all .28s cubic-bezier(.2,.9,.3,1); max-width:520px; margin-inline:auto; }
+.panel.active{ display:block; opacity:1; transform:none; pointer-events:auto; }
+.panel.center{ text-align:center; }
+
+/* Form fields */
+.field{ margin:10px 0; display:flex; flex-direction:column; gap:6px; }
+.label-text{ font-weight:600; font-size:.92rem; color:var(--muted); }
+input[type="text"], input[type="email"], input[type="password"]{
+  padding:12px 14px; border-radius:10px; border:1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.03); color:inherit; outline:none; transition: box-shadow .12s ease, border-color .12s ease;
+}
+@media (prefers-color-scheme: light){
+  input{ background: #fff; color: #0f172a; border:1px solid rgba(2,6,23,0.06) }
+}
+input:focus{ box-shadow:0 8px 30px rgba(14,165,233,0.07); border-color:var(--accent); }
+
+.pw-wrap{ position:relative; display:flex; align-items:center; }
+.pw-wrap .toggle{ position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent; border:none; padding:6px 8px; cursor:pointer; font-weight:600; color:var(--muted); }
+.pw-wrap .toggle:focus{ outline:3px solid rgba(14,165,233,0.12); border-radius:8px; }
+
+/* Row */
+.row{ display:flex; gap:12px; align-items:center; }
+.row.between{ justify-content:space-between; }
+
+/* Buttons */
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:12px 14px; border-radius:12px; border:none; cursor:pointer; font-weight:700; transition: transform .12s ease, opacity .12s ease; }
+.btn:active{ transform:translateY(1px); }
+.btn[disabled]{ opacity:.6; cursor:not-allowed; transform:none; }
+.btn.primary{ width:100%; background:linear-gradient(90deg,var(--accent),#60a5fa); color:white; box-shadow:0 10px 30px rgba(14,165,233,0.12); }
+.btn.social{ width:100%; background: rgba(255,255,255,0.92); color:#111; border:1px solid rgba(2,6,23,0.06); }
+.divider{ text-align:center; margin:12px 0; color:var(--muted); font-size:.9rem; }
+
+/* Links */
+.link, .link-inline{ background:none; border:none; color:var(--accent); cursor:pointer; padding:0; font:inherit; text-decoration:underline; font-weight:600; }
+.link:focus-visible, .link-inline:focus-visible{ outline:3px solid rgba(14,165,233,0.12); border-radius:6px; }
+
+/* Errors & small */
+.error{ color:var(--error); font-size:.875rem; min-height:1.1rem; }
+.center{ text-align:center; }
+
+/* Footer */
+.card-footer{ margin-top:14px; text-align:center; font-size:.85rem; color:var(--muted); }
+
+/* Toasts */
+#toasts{ position:fixed; top:18px; right:18px; display:flex; flex-direction:column; gap:10px; z-index:40; }
+.toast{ padding:10px 14px; border-radius:10px; color:white; box-shadow:0 8px 30px rgba(2,6,23,.4); min-width:180px; display:flex; justify-content:space-between; gap:10px; align-items:center; }
+.toast.success{ background: linear-gradient(90deg,#16a34a,#34d399); }
+.toast.error{ background: linear-gradient(90deg,#ef4444,#fb7185); }
+
+/* Small screens */
+@media (max-width:520px){
+  .card{ padding:16px; border-radius:14px; }
+  .tabs{ gap:4px; }
+}
+
+  </style>
+</head>
+<body>
+  <!-- 3D Background canvas -->
+  <canvas id="bgCanvas" aria-hidden="true"></canvas>
+
+  <!-- Page container -->
+  <main class="wrap" id="app" aria-live="polite">
+    <section class="card glass" role="region" aria-labelledby="auth-heading">
+      <div class="brand">
+        <img src="logo.svg" alt="AuthApp logo" class="logo" />
+        <div>
+          <h1 id="auth-heading">Secure Sign In</h1>
+          <p class="muted">Fast, minimal authentication — your data stays private.</p>
+        </div>
+      </div>
+
+      <!-- Tabs / Segmented control -->
+      <div class="tabs" role="tablist" aria-label="Authentication tabs">
+        <button id="tab-login" role="tab" aria-selected="true" class="tab active">Login</button>
+        <button id="tab-signup" role="tab" aria-selected="false" class="tab">Sign Up</button>
+        <button id="tab-forgot" role="tab" aria-selected="false" class="tab">Forgot</button>
+      </div>
+
+      <!-- Panels -->
+      <div class="panels">
+        <!-- LOGIN -->
+        <form id="panel-login" class="panel active" role="tabpanel" aria-labelledby="tab-login" autocomplete="on" novalidate>
+          <div class="hint"><span aria-hidden>🔒</span> Secure connection (HTTPS)</div>
+
+          <label class="field">
+            <span class="label-text">Email</span>
+            <input id="login-email" name="email" type="email" inputmode="email" autocomplete="email" required aria-describedby="login-email-err" />
+            <small id="login-email-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <label class="field">
+            <span class="label-text">Password</span>
+            <div class="pw-wrap">
+              <input id="login-pass" name="password" type="password" autocomplete="current-password" required aria-describedby="login-pass-err" />
+              <button type="button" class="toggle" aria-label="Toggle password visibility" data-target="login-pass">Show</button>
+            </div>
+            <small id="login-pass-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <div class="row between">
+            <label class="checkbox"><input id="login-remember" name="remember" type="checkbox" /> <span>Remember me</span></label>
+            <button type="button" class="link" data-switch="forgot" aria-controls="panel-forgot">Forgot password?</button>
+          </div>
+
+          <button id="login-submit" class="btn primary" type="submit" aria-live="polite">Sign in</button>
+
+          <div class="divider">or</div>
+
+          <button id="google-login" class="btn social" type="button" aria-label="Continue with Google">Continue with Google</button>
+
+          <p class="muted center">No account? <button type="button" class="link" data-switch="signup">Create one</button></p>
+        </form>
+
+        <!-- SIGNUP -->
+        <form id="panel-signup" class="panel" role="tabpanel" aria-labelledby="tab-signup" autocomplete="on" novalidate>
+          <div class="hint"><span aria-hidden>🔒</span> We never share your password.</div>
+
+          <label class="field">
+            <span class="label-text">Full name</span>
+            <input id="signup-name" name="name" type="text" autocomplete="name" required aria-describedby="signup-name-err" />
+            <small id="signup-name-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <label class="field">
+            <span class="label-text">Email</span>
+            <input id="signup-email" name="email" type="email" autocomplete="email" required aria-describedby="signup-email-err" />
+            <small id="signup-email-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <label class="field">
+            <span class="label-text">Password</span>
+            <div class="pw-wrap">
+              <input id="signup-pass" name="password" type="password" autocomplete="new-password" required aria-describedby="signup-pass-err" />
+              <button type="button" class="toggle" aria-label="Toggle password visibility" data-target="signup-pass">Show</button>
+            </div>
+            <small id="signup-pass-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <label class="field">
+            <span class="label-text">Confirm password</span>
+            <div class="pw-wrap">
+              <input id="signup-confirm" name="confirm" type="password" autocomplete="new-password" required aria-describedby="signup-confirm-err" />
+              <button type="button" class="toggle" aria-label="Toggle password visibility" data-target="signup-confirm">Show</button>
+            </div>
+            <small id="signup-confirm-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <label class="checkbox">
+            <input id="signup-terms" name="terms" type="checkbox" required aria-describedby="signup-terms-err" />
+            <span>I agree to <a href="#" class="link-inline">Terms</a> & <a href="#" class="link-inline">Privacy</a></span>
+          </label>
+          <small id="signup-terms-err" class="error" aria-live="polite"></small>
+
+          <button id="signup-submit" class="btn primary" type="submit">Create account</button>
+          <p class="muted center">Already a member? <button type="button" class="link" data-switch="login">Sign in</button></p>
+        </form>
+
+        <!-- FORGOT -->
+        <form id="panel-forgot" class="panel" role="tabpanel" aria-labelledby="tab-forgot" novalidate>
+          <div class="hint"><span aria-hidden>🔒</span> We'll send a secure reset link.</div>
+
+          <label class="field">
+            <span class="label-text">Email</span>
+            <input id="forgot-email" name="email" type="email" autocomplete="email" required aria-describedby="forgot-email-err" />
+            <small id="forgot-email-err" class="error" aria-live="polite"></small>
+          </label>
+
+          <button id="forgot-submit" class="btn primary" type="submit">Send reset link</button>
+          <p class="muted center">Remembered it? <button type="button" class="link" data-switch="login">Back to login</button></p>
+        </form>
+
+        <!-- FORGOT SUCCESS (hidden by default) -->
+        <div id="panel-forgot-success" class="panel center" role="tabpanel" hidden>
+          <div class="success">✅</div>
+          <h3>Check your inbox</h3>
+          <p class="muted">We've sent a password reset link.</p>
+          <button class="btn" data-switch="login">Return to Login</button>
+        </div>
+      </div>
+
+      <footer class="card-footer">
+        <small>© <span id="year"></span> AppVyntra · <a href="#" class="link-inline">Privacy</a> · <a href="#" class="link-inline">Terms</a></small>
+      </footer>
+    </section>
+  </main>
+
+  <!-- Toast area -->
+  <div id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Three.js (local or CDN) -->
+  <script src="three.min.js"></script>
+  <script src="three-background.js"></script>
+  <script src="script.js"></script>
+  <script>
+    /* Main UI & Validation logic (vanilla JS)
+   - Tab switching + keyboard navigation
+   - Client validation + inline errors
+   - Disabled submit while "submitting" (mock API)
+   - Toasts (small)
+   - Password toggles
+   - Accessibility attributes management
+*/
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Elements
+  const yearEl = document.getElementById('year'); if(yearEl) yearEl.textContent = new Date().getFullYear();
+  const tabs = { login: document.getElementById('tab-login'), signup: document.getElementById('tab-signup'), forgot: document.getElementById('tab-forgot') };
+  const panels = { login: document.getElementById('panel-login'), signup: document.getElementById('panel-signup'), forgot: document.getElementById('panel-forgot'), 'forgot-success': document.getElementById('panel-forgot-success') };
+  const switches = document.querySelectorAll('[data-switch]');
+  const toastsWrap = document.getElementById('toasts');
+
+  // Helper: toast
+  function toast(msg, type = 'success') {
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<span>${msg}</span><button class="tclose" aria-label="Close">✖</button>`;
+    toastsWrap.appendChild(el);
+    el.querySelector('.tclose').addEventListener('click', () => el.remove());
+    setTimeout(() => el.remove(), 3800);
+  }
+
+  // Tab switch function
+  function switchTo(name) {
+    Object.keys(tabs).forEach(k => {
+      const t = tabs[k];
+      if(!t) return;
+      const active = k === name;
+      t.classList.toggle('active', active);
+      t.setAttribute('aria-selected', String(active));
+      t.tabIndex = active ? 0 : -1;
+    });
+    Object.values(panels).forEach(p => { if(p){ p.classList.remove('active'); p.hidden = true; }});
+    const panel = panels[name] || panels['forgot-success'];
+    if(panel){
+      panel.hidden = false;
+      // small delay to trigger transition
+      requestAnimationFrame(()=> panel.classList.add('active'));
+    }
+    // Update form title (optional)
+    const titleMap = { login: 'Login', signup: 'Create Account', forgot: 'Forgot Password', 'forgot-success': 'Reset Sent' };
+    const formTitle = document.getElementById('formTitle');
+    if(formTitle) formTitle.textContent = titleMap[name] || 'Auth';
+  }
+
+  // Hook tab buttons
+  Object.entries(tabs).forEach(([name, btn]) => {
+    if(!btn) return;
+    btn.addEventListener('click', () => switchTo(name));
+    btn.addEventListener('keydown', (e) => {
+      const order = ['login','signup','forgot'];
+      const idx = order.indexOf(name);
+      if(e.key === 'ArrowRight') { e.preventDefault(); switchTo(order[(idx+1)%order.length]); tabs[order[(idx+1)%order.length]].focus(); }
+      if(e.key === 'ArrowLeft') { e.preventDefault(); switchTo(order[(idx-1+order.length)%order.length]); tabs[order[(idx-1+order.length)%order.length]].focus(); }
+    });
+  });
+
+  // data-switch buttons
+  switches.forEach(s => s.addEventListener('click', () => {
+    const target = s.getAttribute('data-switch');
+    if(target) switchTo(target);
+  }));
+
+  // Password toggles (works for multiple)
+  document.querySelectorAll('.toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-target');
+      const input = document.getElementById(id);
+      if(!input) return;
+      if(input.type === 'password') { input.type = 'text'; btn.textContent = 'Hide'; }
+      else { input.type = 'password'; btn.textContent = 'Show'; }
+      input.focus({ preventScroll: true });
+    });
+  });
+
+  // SIMPLE validators
+  const emailRe = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i;
+  function setError(id, msg) { const el = document.getElementById(id); if(el) { el.textContent = msg || ''; } }
+  function clearErrors(prefix){ ['email','pass','name','confirm','terms'].forEach(k => setError(`${prefix}-${k}-err`, '')); }
+
+  // Mock API functions (async)
+  function sleep(ms=700){ return new Promise(r=>setTimeout(r,ms)); }
+  async function apiLogin(email, pass, remember){ await sleep(900); if(email === 'demo@site.com' && pass === 'Demo@123') return {ok:true}; if(Math.random() < 0.12) throw new Error('Network error'); throw new Error('Invalid email or password'); }
+  async function apiSignup(name, email, pass, terms){ await sleep(1100); if(!terms) throw new Error('Accept terms'); if(email.endsWith('@spam.com')) throw new Error('Disposable email not allowed'); return {ok:true}; }
+  async function apiForgot(email){ await sleep(700); if(!email.includes('@')) throw new Error('Email not found'); return {ok:true}; }
+
+  // SUBMIT HANDLERS: Login
+  const loginForm = document.getElementById('panel-login');
+  if(loginForm) loginForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    clearErrors('login');
+    const email = (document.getElementById('login-email').value || '').trim();
+    const pass  = (document.getElementById('login-pass').value || '').trim();
+    if(!emailRe.test(email)){ setError('login-email-err','Enter a valid email'); return; }
+    if(pass.length < 6){ setError('login-pass-err','Password must be 6+ chars'); return; }
+    const submitBtn = document.getElementById('login-submit');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Signing in…';
+    try{
+      await apiLogin(email, pass, document.getElementById('login-remember').checked);
+      toast('Signed in successfully', 'success');
+      // on success: you can redirect here
+    }catch(err){ toast(err.message || 'Failed', 'error'); }
+    finally{ submitBtn.disabled = false; submitBtn.textContent = 'Sign in'; }
+  });
+
+  // SIGNUP
+  const signupForm = document.getElementById('panel-signup');
+  if(signupForm) signupForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    clearErrors('signup');
+    const name = (document.getElementById('signup-name').value || '').trim();
+    const email = (document.getElementById('signup-email').value || '').trim();
+    const pass = (document.getElementById('signup-pass').value || '');
+    const confirm = (document.getElementById('signup-confirm').value || '');
+    const terms = document.getElementById('signup-terms').checked;
+    if(name.length < 2){ setError('signup-name-err','Enter your full name'); return; }
+    if(!emailRe.test(email)){ setError('signup-email-err','Enter a valid email'); return; }
+    if(pass.length < 8 || !/[A-Z]/.test(pass) || !/[a-z]/.test(pass) || !/\d/.test(pass) || !/[^A-Za-z0-9]/.test(pass)) {
+      setError('signup-pass-err','Min 8 chars: upper, lower, digit & symbol'); return;
+    }
+    if(confirm !== pass){ setError('signup-confirm-err','Passwords do not match'); return; }
+    if(!terms){ setError('signup-terms-err','You must accept terms'); return; }
+    const submitBtn = document.getElementById('signup-submit');
+    submitBtn.disabled = true; submitBtn.textContent = 'Creating…';
+    try{
+      await apiSignup(name, email, pass, terms);
+      toast('Account created — please sign in', 'success');
+      switchTo('login');
+    }catch(err){ toast(err.message || 'Signup failed', 'error'); }
+    finally{ submitBtn.disabled = false; submitBtn.textContent = 'Create account'; }
+  });
+
+  // FORGOT
+  const forgotForm = document.getElementById('panel-forgot');
+  if(forgotForm) forgotForm.addEventListener('submit', async (ev) => {
+    ev.preventDefault();
+    clearErrors('forgot');
+    const email = (document.getElementById('forgot-email').value || '').trim();
+    if(!emailRe.test(email)){ setError('forgot-email-err','Enter a valid email'); return; }
+    const submitBtn = document.getElementById('forgot-submit');
+    submitBtn.disabled = true; submitBtn.textContent = 'Sending…';
+    try{
+      await apiForgot(email);
+      toast('Reset link sent', 'success');
+      switchTo('forgot-success');
+    }catch(err){ toast(err.message || 'Failed', 'error'); }
+    finally{ submitBtn.disabled = false; submitBtn.textContent = 'Send reset link'; }
+  });
+
+  // Social (mock)
+  const gbtn = document.getElementById('google-login');
+  if(gbtn) gbtn.addEventListener('click', () => toast('Google login (mock) — integrate OAuth to enable', 'success'));
+
+  // Small keyboard accessibility: Enter on links
+  document.querySelectorAll('.link, .link-inline').forEach(el => {
+    el.addEventListener('keydown', (e) => { if(e.key === 'Enter'){ e.preventDefault(); el.click(); }});
+  });
+
+  // initial tab focus
+  tabs.login && tabs.login.focus();
+});
+
+  </script>
+</body>
+
+</html>

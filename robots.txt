@@ -1,0 +1,5 @@
+User-agent: *
+Disallow:
+
+Sitemap: https://my-project512.github.io/AppVyntra/sitemap.xml
+

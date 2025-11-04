@@ -1,0 +1,116 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Information</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: #e0e5ec;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      background: #e0e5ec;
+      padding: 40px 30px;
+      border-radius: 20px;
+      box-shadow: 8px 8px 16px #babec4,
+                  -8px -8px 16px #ffffff;
+      width: 350px;
+      position: relative;
+    }
+    .logo {
+      position: absolute;
+      top: -40px;
+      left: calc(50% - 40px);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 6px 6px 12px #babec4,
+                  -6px -6px 12px #ffffff;
+      background: #fff;
+    }
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    h2 {
+      text-align: center;
+      margin: 50px 0 20px;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    input, textarea {
+      margin-bottom: 18px;
+      padding: 12px;
+      border: none;
+      outline: none;
+      border-radius: 50px;
+      font-size: 14px;
+      background: #e0e5ec;
+      box-shadow: inset 6px 6px 12px #babec4,
+                  inset -6px -6px 12px #ffffff;
+    }
+    textarea {
+      border-radius: 15px;
+      resize: none;
+    }
+    button {
+      padding: 12px;
+      border: none;
+      border-radius: 50px;
+      background: #6c6f73;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      box-shadow: 6px 6px 12px #babec4,
+                  -6px -6px 12px #ffffff;
+      transition: 0.3s;
+    }
+    button:hover {
+      background: #4d4f52;
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@2/dist/email.min.js"></script>
+  <script>
+    (function(){
+      emailjs.init("2gbmzKvy-e5huhmpv"); // Apna EmailJS public key daaliye
+    })();
+
+    function sendMail(e) {
+      e.preventDefault();
+      emailjs.send("service_jwbg1ua","template_zsec2hn",{
+        from_name: document.getElementById("name").value,
+        from_email: document.getElementById("email").value,
+        message: document.getElementById("message").value
+      }).then(function(response){
+        alert("Information sent successfully!");
+      }, function(error){
+        alert("Failed to send. Try again.");
+      });
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+      <img src="logo.svg" alt="logo">
+    
+    <h2>Enroll Now</h2>
+    <form onsubmit="sendMail(event)">
+      <input type="text" id="name" placeholder="Your Name" required>
+      <input type="email" id="email" placeholder="Your Email" required>
+      <textarea id="message" rows="4" placeholder="Your Message" required></textarea>
+      <button type="submit">Send</button>
+    </form>
+  </div>
+</body>
+</html>

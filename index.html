@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html language="english">
+<head>
+  <meta charset="utf-8" />
+  <meta name="google-site-verification" content="zhm0ZBFUKd-rbh4CJg1t06v2tbrOrm4tIFjo62J3_3s" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AppVyntra | Advanced Software Store</title>
+  <meta name="title" content="AppVyntra - Advanced Software Marketplace">
+<meta name="description" content="AppVyntra is a futuristic platform for advanced software sales and digital solutions.">
+<meta name="keywords" content="AppVyntra, software store, buy software, digital marketplace, tech tools">
+<meta name="robots" content="index, follow">
+<meta name="author" content="AppVyntra Team">
+  <meta name="description" content="AppVyntra is a premium, interactive 3D website with smooth animations and futuristic design.">
+  <meta name="keywords" content="AppVyntra, 3D Website, Futuristic Design, Interactive, GitHub Pages">
+  <meta name="description" content="A fully responsive, SEO-friendly 3D animated modern website with Three.js & GSAP." />
+  <meta name="theme-color" content="#0b0f1a" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <meta property="og:title" content="AppVyntra — Futuristic 3D Experience" />
+  <meta property="og:description" content="A premium interactive 3D website with neon gradients and smooth animations." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://dummyimage.com/1200x630/0b0f1a/ffffff&text=AppVyntra" />
+  <script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "AppVyntra",
+    "url": "https://example.com",
+    "logo": "https://dummyimage.com/256x256/0b0f1a/ffffff&text=N"
+  }
+  </script>
+  
+  <style>
+      :root{
+      --bg:#0b0f1a; 
+      --fg:#d8e0ff; 
+      --muted:#95a1ff;
+      --neon1:#6a5cff; 
+      --neon2:#b400ff; 
+      --neon3:#ff2ea6; 
+      --glass: rgba(255,255,255,0.06);
+      --border: rgba(255,255,255,0.08);
+      --maxw:1200px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%;scroll-behavior:smooth}
+    body{
+      margin:0;font-family:'Outfit',system-ui,Segoe UI,Roboto,Arial;
+      color:var(--fg);background:radial-gradient(1200px 800px at 80% -20%, rgba(106,92,255,.25), transparent 60%),
+               radial-gradient(900px 600px at -10% 20%, rgba(180,0,255,.18), transparent 55%),
+               linear-gradient(180deg, #0b0f1a 0%, #070a12 100%);
+      overflow-x:hidden;
+    }
+    a{color:inherit;text-decoration:none}
+    
+    header{
+      position:fixed;top:0;left:0;right:0;z-index:50;
+      backdrop-filter:saturate(160%) blur(10px);
+      background:linear-gradient(180deg, rgba(11,15,26,.75), rgba(11,15,26,.3));
+      border-bottom:1px solid var(--border);
+    }
+    .nav{max-width:var(--maxw);margin:auto;padding:14px 20px;display:flex;align-items:center;gap:14px}
+    .brand{font-weight:800;letter-spacing:.5px;font-size:1.05rem;display:flex;align-items:center;gap:.6rem}
+    .dot{width:10px;height:10px;border-radius:999px;background:conic-gradient(from 90deg, var(--neon1), var(--neon2), var(--neon3));box-shadow:0 0 16px var(--neon2)}
+    .spacer{flex:1}
+    .nav a.link{padding:8px 12px;border-radius:999px;border:1px solid transparent;transition:.25s}
+    .nav a.link:hover{border-color:var(--border);box-shadow:0 0 20px rgba(106,92,255,.35), inset 0 0 10px rgba(255,46,166,.15)}
+    .menu{display:flex;gap:6px}
+    .cta{
+      margin-left:8px;padding:10px 16px;border-radius:999px;
+      background:linear-gradient(90deg,var(--neon1),var(--neon2),var(--neon3));
+      background-size:200% 100%;
+      animation: sheengrad 6s linear infinite;
+      color:white;font-weight:700;border:0;cursor:pointer;box-shadow:0 0 24px rgba(180,0,255,.35);
+      transition: transform .2s ease;
+    }
+    .cta:hover{transform:translateY(-2px)}
+    .burger{display:none}
+
+    
+    .hero{position:relative;min-height:100vh;display:grid;place-items:center;padding-top:88px}
+    canvas#bg{position:fixed;inset:0;z-index:-1}
+    .hero-inner{max-width:var(--maxw);padding:40px 20px;display:grid;grid-template-columns:1.2fr 1fr;gap:32px;align-items:center}
+    .badge{display:inline-flex;align-items:center;gap:.45rem;border:1px solid var(--border);background:var(--glass);
+      padding:6px 12px;border-radius:999px;font-size:.85rem;color:#cdd5ff}
+    .badge .pulse{width:8px;height:8px;border-radius:999px;background:var(--neon3);box-shadow:0 0 14px var(--neon3);animation:pulse 1.5s infinite ease-in-out}
+    h1{font-size:clamp(2rem, 4vw + 1rem, 4rem);line-height:1.05;margin:14px 0}
+    .sub{font-size:clamp(1rem, .8vw + .6rem, 1.25rem);opacity:.85;max-width:60ch}
+    .actions{display:flex;gap:12px;margin-top:22px;flex-wrap:wrap}
+    .ghost{padding:10px 16px;border-radius:999px;border:1px solid var(--border);background:transparent;color:var(--fg);cursor:pointer}
+    .ghost:hover{box-shadow:0 0 20px rgba(106,92,255,.25)}
+
+    section{max-width:var(--maxw);margin:0 auto;padding:96px 20px}
+    .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+    .card{grid-column:span 6;border:1px solid var(--border);background:var(--glass);border-radius:18px;padding:22px;min-height:160px;position:relative;overflow:hidden}
+    .card:before{content:"";position:absolute;inset:-1px;border-radius:inherit;
+      background:conic-gradient(from 180deg at 50% 50%, rgba(106,92,255,.18), rgba(180,0,255,.18), rgba(255,46,166,.18), transparent 60%);
+      filter:blur(18px);opacity:.6;pointer-events:none}
+    h2{font-size:clamp(1.6rem, 1.4vw + 1rem, 2.4rem);margin:0 0 16px}
+    .muted{color:#c1c9ffcc}
+
+    
+    .port-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
+    .port-item{position:relative;border:1px solid var(--border);background:linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));border-radius:16px;overflow:hidden;min-height:200px;isolation:isolate}
+    .port-item img{width:100%;height:200px;object-fit:cover;display:block;filter:saturate(1.2)}
+    .port-item .label{position:absolute;inset:auto 12px 12px 12px;border-radius:12px;padding:8px 12px;background:rgba(11,15,26,.6);backdrop-filter:blur(6px);border:1px solid var(--border)}
+
+    
+    form{display:grid;gap:12px;max-width:640px}
+    input,textarea{width:100%;padding:12px 14px;border-radius:12px;border:1px solid var(--border);background:rgba(255,255,255,.04);color:var(--fg)}
+    textarea{min-height:130px}
+    .submit{justify-self:start}
+
+    
+    footer{padding:32px 20px;border-top:1px solid var(--border);background:rgba(255,255,255,.03)}
+    .footer-inner{max-width:var(--maxw);margin:auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+    
+    @keyframes sheengrad{0%{background-position:0% 50%}100%{background-position:200% 50%}}
+    @keyframes pulse{0%,100%{transform:scale(.9);opacity:.7}50%{transform:scale(1.15);opacity:1}}
+    .hide{display:none}
+
+    @media (max-width: 900px){
+      .hero-inner{grid-template-columns:1fr;gap:24px}
+      .menu{display:none}
+      .burger{display:inline-flex;margin-left:auto}
+    }
+    .header-img {
+    position: absolute;
+    right: 10px;
+    top: 450px;
+    width: 100%;
+    max-width: 500px;
+    height: auto;
+}
+
+/* Add responsive adjustments */
+@media (max-width: 900px) {
+    .header-img {
+        position: relative;
+        right: auto;
+        top: auto;
+        max-width: 80%;
+        margin: 20px auto;
+        display: block;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-img {
+        max-width: 90%;
+    }
+}
+  </style>
+</head>
+<body>
+  <header aria-label="Site Navigation">
+    <nav class="nav" role="navigation">
+      <a class="brand" href="#home" aria-label="AppVyntra Home">
+        <img src="logo.svg">AppVyntra
+      </a>
+      <div class="spacer"></div>
+      <div class="menu" aria-label="Main Menu">
+        <a class="link" href="#home">Home</a>
+        <a class="link" href="#about">About</a>
+        <a class="link" href="services.html">Services</a>
+        <a class="link" href="#portfolio">Portfolio</a>
+        <a class="link" href="#contact">Contact</a>
+      </div>
+      <button class="cta" onclick="document.querySelector('login.html').scrollIntoView({behavior:'smooth'})"><a href="login.html">Login</button></a>
+      <button class="ghost burger" aria-label="Open Menu" onclick="toggleMenu()">☰</button>
+    </nav>
+  </header>
+  
+  <img src="web-dev-english.webp" class="header-img">
+  
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+  <main id="home" class="hero">
+    <div class="hero-inner">
+      <div>
+        <span class="badge"><span class="pulse"></span> Live 3D Experience</span>
+        <h1>Build Your <span style="background:linear-gradient(90deg,var(--neon1),var(--neon2),var(--neon3));-webkit-background-clip:text;background-clip:text;color:transparent">Futuristic Presence</span></h1>
+        <p class="sub">A premium, interactive website powered by real‑time 3D & buttery‑smooth animations. Designed to be responsive, SEO‑friendly, and blazing fast on mid‑range devices.</p>
+        <div class="actions">
+          <a class="cta" href="https://my-project512.github.io/get-info-512/" aria-label="See Work">Portfolio</a>
+          <a class="ghost" href="#about">Explore Features</a>
+          <a class="cta" href="Payment.html" aria-label="Payment">Payment</a>
+        </div>
+      </div>
+      <div>
+        
+        <div class="card" role="img" aria-label="Abstract neon 3D shapes">
+          <h3 style="margin:0 0 8px">Realtime 3D • Parallax</h3>
+          <p class="muted" style="margin:0">Move your mouse / tilt device to feel depth. Elements fade and slide with scroll‑triggered transitions.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <section id="about" aria-labelledby="about-title">
+    <h2 id="about-title">About</h2>
+    <p class="muted">We blend Three.js scenes with GSAP timelines to craft cinematic hero sections, micro‑interactions, and delightful page transitions. The stack prioritizes accessibility, performance, and SEO.</p>
+    <div class="grid" style="margin-top:18px">
+      <div class="card" data-tilt>
+  <div class="card-content">
+    <h3>Performance</h3>
+    <p class="muted">
+      Adaptive quality: particle count and post-effects scale to your device.
+      Lazy-loaded assets and efficient render loop.
+    </p>
+  </div>
+</div>
+      <div class="card" data-tilt>
+        <h3>Accessibility</h3>
+        <p class="muted">Semantic HTML, high contrast, focus states, and reduced‑motion support for sensitive users.</p>
+      </div>
+      <div class="card" data-tilt>
+        <h3>SEO‑Ready</h3>
+        <p class="muted">Meta tags, clean URLs, landmarks, and structured data to help crawlers and social embeds.</p>
+      </div>
+      <div class="card" data-tilt>
+        <h3>Design System</h3>
+        <p class="muted">Neon gradient brand with glassmorphism cards, rounded corners, and soft glows.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="services" aria-labelledby="services-title">
+    <h2 id="services-title">Services</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>3D Landing Pages</h3>
+        <p class="muted">Hero scenes with interactive shapes, particles, and depth‑driven parallax.</p>
+      </div>
+      <div class="card">
+        <h3>GSAP Micro‑Interactions</h3>
+        <p class="muted">Buttons, menus, and cards that respond with tactile motion and glow.</p>
+      </div>
+      <div class="card">
+        <h3>WebGL Visualizers</h3>
+        <p class="muted">Audio‑reactive graphs, orbital systems, and shader‑based motion.</p>
+      </div>
+      <div class="card">
+        <h3>SEO & Performance</h3>
+        <p class="muted">Core Web Vitals optimization with lazy‑loading & code‑splitting.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="portfolio" aria-labelledby="portfolio-title">
+    <h2 id="portfolio-title">Portfolio</h2>
+    <div class="port-grid">
+      <article class="port-item">
+        <img src="web image3.jpg" alt="Futuristic neon tunnel" loading="lazy">
+        <div class="label">Neon Tunnel</div>
+      </article>
+      <article class="port-item">
+        <img src="https://images.unsplash.com/photo-1542751371-adc38448a05e?q=80&w=1200&auto=format&fit=crop" alt="Abstract 3D geometry" loading="lazy"/>
+        <div class="label">Geo Structures</div>
+      </article>
+      <article class="port-item">
+        <img src="https://images.unsplash.com/photo-1531747056595-07f6cbbe10ad?q=80&w=1200&auto=format&fit=crop" alt="Colorful light waves" loading="lazy"/>
+        <div class="label">Light Waves</div>
+      </article>
+      <article class="port-item">
+        <img src="https://images.unsplash.com/photo-1557264337-e8a93017fe92?q=80&w=1200&auto=format&fit=crop" alt="Abstract particle field" loading="lazy"/>
+        <div class="label">Particle Field</div>
+      </article>
+    </div>
+  </section>
+
+  <section id="contact" aria-labelledby="contact-title">
+  <h2 id="contact-title">Contact</h2>
+  <p class="muted">Tell us about your project. We’ll respond within 24 hours.</p>
+
+  <form id="contact-form">
+    <label>
+      <span class="muted">Name</span>
+      <input type="text" name="name" required placeholder="Alex Neon" />
+    </label>
+    <label>
+      <span class="muted">Email</span>
+      <input type="email" name="email" required placeholder="you@example.com" />
+    </label>
+    <label>
+      <span class="muted">Message</span>
+      <textarea name="message" required placeholder="I want a 3D landing page with... "></textarea>
+    </label>
+    <button class="cta submit" type="submit">Send Message</button>
+  </form>
+</section>
+
+  <footer>
+    <div class="footer-inner">
+      <span>© <span id="year"></span> AppVyntra</span>
+      <a class="link" href="#home">Back to top ↑</a>
+    </div>
+  </footer>
+
+  
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.min.js" type="module"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <script>
+    
+    function toggleMenu(){
+      const menu = document.querySelector('.menu');
+      if(!menu) return;
+      menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    
+    const canvas = document.getElementById('bg');
+    let renderer, scene, camera, torus, particleSys;
+    let targetX = 0, targetY = 0;
+
+    function init3D(){
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.75); // cap DPR for perf
+      scene = new THREE.Scene();
+      camera = new THREE.PerspectiveCamera(60, window.innerWidth/window.innerHeight, 0.1, 100);
+      camera.position.set(0, .4, 3.8);
+
+      renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
+      renderer.setPixelRatio(dpr);
+      renderer.setSize(window.innerWidth, window.innerHeight);
+
+      
+      const dir = new THREE.DirectionalLight(0xffffff, 0.75); dir.position.set(3,5,2);
+      const amb = new THREE.AmbientLight(0x8899ff, .55);
+      scene.add(dir, amb);
+
+      
+      const geo = new THREE.TorusKnotGeometry(0.9, 0.28, 180, 24);
+      const mat = new THREE.MeshStandardMaterial({
+        color: 0x7a6cff,
+        metalness: .6,
+        roughness: .25,
+        emissive: 0x2a0033,
+        emissiveIntensity: .7
+      });
+      torus = new THREE.Mesh(geo, mat);
+      torus.position.set(0, .2, 0);
+      scene.add(torus);
+
+      const count = Math.min(3000, Math.floor((window.innerWidth*window.innerHeight)/400));
+      const positions = new Float32Array(count*3);
+      for(let i=0;i<count;i++){
+        positions[i*3+0] = (Math.random()-0.5)*20;
+        positions[i*3+1] = (Math.random()-0.5)*12;
+        positions[i*3+2] = (Math.random()-0.5)*20;
+      }
+      const pGeo = new THREE.BufferGeometry();
+      pGeo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+      const pMat = new THREE.PointsMaterial({size:0.03, transparent:true, opacity:0.8, depthWrite:false, color:0xB400FF});
+      particleSys = new THREE.Points(pGeo, pMat);
+      scene.add(particleSys);
+
+      window.addEventListener('resize', ()=>{
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+      
+      window.addEventListener('mousemove', (e)=>{
+        const x = (e.clientX/window.innerWidth) - .5;
+        const y = (e.clientY/window.innerHeight) - .5;
+        targetX = x; targetY = y;
+      });
+
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if(prefersReduced){
+        
+        gsap.ticker.lagSmoothing(500, 33);
+      }
+
+      animate();
+    }
+
+    function animate(){
+      requestAnimationFrame(animate);
+      if(!renderer) return;
+      // ease camera to mouse target for parallax
+      camera.position.x += (targetX*0.9 - camera.position.x)*0.04;
+      camera.position.y += (targetY*0.6 + 0.4 - camera.position.y)*0.04;
+      camera.lookAt(0, .2, 0);
+
+      // rotate objects
+      if(torus){
+        torus.rotation.y += 0.0045;
+        torus.rotation.x += 0.0015;
+      }
+      if(particleSys){
+        particleSys.rotation.y -= 0.0009;
+      }
+      renderer.render(scene, camera);
+    }
+
+    try{ init3D(); }catch(err){ console.warn('Three.js failed, falling back', err); canvas.classList.add('hide'); }
+
+    // ====== GSAP SCROLL ANIMATIONS ======
+    gsap.registerPlugin(ScrollTrigger);
+
+    // page load intro
+    gsap.from('.badge, h1, .sub, .actions', {
+      opacity:0, y:24, duration:1, stagger:0.08, ease:'power3.out', delay:.2
+    });
+
+    // section reveals
+    document.querySelectorAll('section').forEach((sec, i)=>{
+      gsap.from(sec.querySelectorAll('h2, p, .card, .port-item, form'), {
+        scrollTrigger:{ trigger: sec, start: 'top 75%' },
+        opacity:0, y:28, duration:.8, stagger:0.06, ease:'power3.out'
+      });
+    });
+
+    // 3D tilt on cards (micro‑interaction)
+    const tiltEls = document.querySelectorAll('[data-tilt]');
+    tiltEls.forEach(card=>{
+      let x=0,y=0; const max=8;
+      card.addEventListener('mousemove', (e)=>{
+        const r=card.getBoundingClientRect();
+        const px=(e.clientX-r.left)/r.width - .5;
+        const py=(e.clientY-r.top)/r.height - .5;
+        x = px*max; y = -py*max;
+        card.style.transform = `rotateX(${y}deg) rotateY(${x}deg)`;
+      });
+      card.addEventListener('mouseleave', ()=>{
+        card.style.transform = 'rotateX(0) rotateY(0)';
+      });
+    });
+
+    // smooth in‑page anchor scrolling (for older browsers)
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href');
+        const target = document.querySelector(id);
+        if(target){ e.preventDefault(); target.scrollIntoView({behavior:'smooth'}); }
+      });
+    });
+    
+  emailjs.init("2gbmzKvy-e5huhmpv");
+
+  document.getElementById("contact-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    emailjs.sendForm("service_jwbg1ua", "template_zsec2hn", this)
+      .then(() => {
+        alert("✅ Thanks! We’ll be in touch.");
+        this.reset();
+      }, (error) => {
+        alert("❌ Failed: " + error.text);
+      });
+  });
+  </script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
